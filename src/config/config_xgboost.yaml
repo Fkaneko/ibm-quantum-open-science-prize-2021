@@ -1,0 +1,17 @@
+# random seed
+seed: 42
+
+cached_data:
+  dataset_csv_path: "./your_quantum_device_run_result.csv"
+  backend_properties:
+    gate_path: "./your_backend_gate.csv"
+    qubit_path: "./your_backend_qubit.csv"
+  backend_pickle_dir: "../input/jakarta_data"  # not necessary at submission.zip
+
+save_dir_path: "./your_trained_xgb_model_dir"
+
+visualize_properties: False
+n_splits: 5
+
+xgboost:
+  n_estimators: 64

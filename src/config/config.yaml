@@ -1,0 +1,79 @@
+defaults:
+  - neptune_logger: neptune_blank # Using neptune_blank as default, If you have an Neptune account set it here
+  - _self_  # following https://hydra.cc/docs/upgrades/1.0_to_1.1/default_composition_order/
+
+# hydra work dir override
+hydra:
+  run:
+    dir: ./working/ibm_open_science_${hydra.job.name}/${now:%Y-%m-%d_%H-%M-%S}
+  sweep:
+    # Output directory for sweep runs
+    dir: ./working/multi_run/ibm_open_science_${hydra.job.name}/${now:%Y-%m-%d_%H-%M-%S}
+  verbose: none  #  specify module name like __main__, ane then these module logging level will be DEBUG
+
+# random seed
+seed: 42
+
+# run mode, splitting submit job and evaluate fidelity phase. Because it takes some time to a process job on IBMQ cloud.
+run_mode: ALL # SUBMIT_JOB/EVALUATE/ALL
+target_process: NORMAL # NORMAL/DATASET_GENERATION/ALL
+
+# qiskit backend_name settings
+backend_name: JAKARTA  # SIM/NOISY_SIM/JAKARTA
+
+# trotter step configuration
+trotter:
+  steps: 10
+  is_inverse_step:
+  # step level settings
+  single_step:
+    name: single_trotter_step
+    num_qubits: 3
+    qrs_for_each_qc: 
+      0: [0, 1]
+      1: [1, 2]
+  # each register level settings
+  unit_qc:
+    qr13:
+      name: "three_cnot_decomposed"
+      key: "NORMAL"
+      flip_cnot_directions: [False, True, False] #  after 3cnot decomposition, we can choose each cnot direction, flip control/target qubit. 
+    qr35:
+      name: "three_cnot_decomposed"
+      key: "NORMAL"
+      flip_cnot_directions: [False, True, False] #  after 3cnot decomposition, we can choose each cnot direction, flip control/target qubit. 
+
+# trotter step error
+calib_trotter:
+  is_inverse_step: True
+  qubit_list: [1,3,5]
+  trotter_steps_list: [2, 4, 6, 8, 10, 12]
+  sample_times: [0.25, 0.5, 0.75, 1.0, 1.25, 1.5]  # x PI
+
+transpile:
+  optimization_level: 1  # transpile level, qiskit default 1
+
+
+# qiskit mesurement calib settings
+carib:
+  qr_size: 7
+  qubit_list: [1,3,5]
+  is_measurement: True
+  method: "least_squares"  # pseudo_inverse/least_squares
+
+# my job meta data path
+job_table_path: "./your_ibmq_job_metadata.csv"
+
+exp_log_path: "./exp_log.pickle"
+
+# from ibmq cloud server job
+job_retrieval:
+
+meas_fitter_override:
+  path:
+  skip_meas_filter: False
+
+# xgboost path for generating 8 x 8 filter. All fold will be used.
+xgboost:
+  load:
+    path: "./your_trained_xgb_model_dir"
